@@ -1,4 +1,4 @@
-use sqlparser::ast::Statement;
+pub use sqlparser::ast::Statement;
 use sqlparser::dialect::PostgreSqlDialect;
 use sqlparser::parser::Parser as SQLParser;
 use sqlparser::parser::ParserError;
