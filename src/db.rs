@@ -1,6 +1,9 @@
+use crate::catalog::DatabaseCatalog;
 use crate::executor::Executor;
 use crate::parser::Parser;
+use std::sync::Arc;
 
+pub use crate::catalog::CatalogError;
 pub use crate::executor::ExecutionError;
 pub use sqlparser::parser::ParserError;
 
@@ -11,13 +14,20 @@ pub enum DbError {
 
     #[error("execution error: {0}")]
     Execute(#[from] ExecutionError),
+
+    #[error("catalog error: {0}")]
+    Catalog(#[from] CatalogError),
 }
 
-pub struct Database {}
+pub struct Database {
+    catalog: Arc<DatabaseCatalog>,
+}
 
 impl Database {
     pub fn new() -> Self {
-        Database {}
+        Database {
+            catalog: Arc::new(DatabaseCatalog::new()),
+        }
     }
 
     pub fn run(&self, sql: &str) -> Result<Vec<String>, DbError> {

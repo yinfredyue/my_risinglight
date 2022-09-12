@@ -1,5 +1,8 @@
+mod catalog;
 pub mod db;
-pub mod executor;
-pub mod parser;
+mod executor;
+mod parser;
+mod types;
+mod utils;
 
 pub use db::{Database, DbError};

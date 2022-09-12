@@ -1,9 +1,8 @@
-use anyhow::Result; // Easily handling different `Result`
-use my_risinglight::db::Database;
+use my_risinglight::db::{Database, DbError};
 use rustyline::{error::ReadlineError, Editor};
 
-fn main() -> Result<()> {
-    let mut rl = Editor::<()>::new()?;
+fn main() -> Result<(), DbError> {
+    let mut rl = Editor::<()>::new().expect("Open editor error");
     let _ = rl.load_history("history.txt");
 
     let db = Database::new();
@@ -28,6 +27,7 @@ fn main() -> Result<()> {
         }
     }
 
-    rl.save_history("history.txt")?;
+    rl.save_history("history.txt")
+        .expect("Save editor history error");
     Ok(())
 }
