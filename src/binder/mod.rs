@@ -3,11 +3,12 @@ mod statements;
 use std::sync::Arc;
 
 use super::catalog::DEFAULT_SCHEMA_NAME;
-pub use crate::binder::statements::BoundCreateTable;
+pub use crate::binder::statements::{BoundCreateTable, BoundSelect};
 use crate::{catalog::DatabaseCatalog, parser::Statement};
 use sqlparser::ast::{Ident, ObjectName};
 
 pub enum BoundStatement {
+    Select(BoundSelect),
     CreateTable(BoundCreateTable),
 }
 
@@ -32,7 +33,7 @@ impl Binder {
 
     pub fn bind(&self, stmt: &Statement) -> Result<BoundStatement, BindingError> {
         match stmt {
-            Statement::Query(query_stmt) => todo!(),
+            Statement::Query(query) => Ok(BoundStatement::Select(self.bind_select(query)?)),
             Statement::CreateTable { .. } => {
                 Ok(BoundStatement::CreateTable(self.bind_create_table(stmt)?))
             }

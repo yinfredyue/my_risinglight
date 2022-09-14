@@ -1,0 +1,5 @@
+#V2
+CREATE TABLE student (\n    id      INTEGER PRIMARY KEY,\n    name    VARCHAR NOT NULL,\n    age     INTEGER\n);
+select 1
+select 1, 2;
+exit

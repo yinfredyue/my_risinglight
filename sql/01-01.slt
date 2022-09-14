@@ -3,12 +3,12 @@
 # See https://www.sqlite.org/sqllogictest/doc/trunk/about.wiki
 
 # A trivial example of SQL query test.
-query I
+query I # I: expect integer
 SELECT 1
 ----
 1
 
-query T
+query T # T: expect text
 SELECT 'Hello, world!'
 ----
 Hello, world!
