@@ -1,23 +1,49 @@
 mod statements;
 
-use crate::binder::statements::BoundCreateTable;
-use crate::parser::Statement;
+use std::sync::Arc;
+
+use super::catalog::DEFAULT_SCHEMA_NAME;
+pub use crate::binder::statements::BoundCreateTable;
+use crate::{catalog::DatabaseCatalog, parser::Statement};
+use sqlparser::ast::{Ident, ObjectName};
 
 pub enum BoundStatement {
     CreateTable(BoundCreateTable),
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum BindingError {}
+pub enum BindingError {
+    #[error("invalid table name: {0:?}")]
+    InvalidTableName(Vec<Ident>),
+    #[error("schema not found: {0}")]
+    SchemaNotFound(String),
+}
 
-pub struct Binder {}
+pub struct Binder {
+    catalog: Arc<DatabaseCatalog>,
+}
 
 impl Binder {
-    pub fn new() -> Self {
-        todo!()
+    pub fn new(catalog: Arc<DatabaseCatalog>) -> Self {
+        Binder { catalog }
     }
 
     pub fn bind(&self, stmt: &Statement) -> Result<BoundStatement, BindingError> {
-        todo!()
+        match stmt {
+            Statement::Query(query_stmt) => todo!(),
+            Statement::CreateTable { .. } => {
+                Ok(BoundStatement::CreateTable(self.bind_create_table(stmt)?))
+            }
+            _ => todo!(),
+        }
     }
+}
+
+/// Split an [ObjectName] into `(schema name, table name)`.
+fn split_name(name: &ObjectName) -> Result<(&str, &str), BindingError> {
+    Ok(match name.0.as_slice() {
+        [table] => (DEFAULT_SCHEMA_NAME, &table.value),
+        [schema, table] => (&schema.value, &table.value),
+        _ => return Err(BindingError::InvalidTableName(name.0.clone())),
+    })
 }

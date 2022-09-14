@@ -1,12 +1,15 @@
 use crate::catalog::column::{ColumnCatalog, ColumnDesc};
 use crate::catalog::{ColumnId, TableId};
+use crate::utils::id_gen::IntIdGen;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+#[derive(Debug)]
 struct Inner {
     id: TableId,
     name: String,
     columns: HashMap<ColumnId, Arc<ColumnCatalog>>,
+    column_id_gen: IntIdGen,
 }
 
 pub struct TableCatalog {
@@ -14,14 +17,32 @@ pub struct TableCatalog {
 }
 
 impl TableCatalog {
-    pub fn new(id: TableId, name: String, columns: &[(String, ColumnDesc)]) -> Self {
-        TableCatalog {
+    pub fn new(id: TableId, name: String, columns_list: &[(String, ColumnDesc)]) -> Self {
+        let catalog = TableCatalog {
             inner: Mutex::new(Inner {
                 id,
                 name,
                 columns: HashMap::new(),
+                column_id_gen: IntIdGen::new(),
             }),
+        };
+
+        {
+            let mut inner = catalog.inner.lock().unwrap();
+            for (name, column_desc) in columns_list {
+                let column_id = inner.column_id_gen.next_id();
+                inner.columns.insert(
+                    column_id,
+                    Arc::new(ColumnCatalog::new(
+                        column_id,
+                        name.to_string(),
+                        column_desc.clone(),
+                    )),
+                );
+            }
         }
+
+        catalog
     }
 
     pub fn id(&self) -> TableId {

@@ -1,15 +1,30 @@
-use super::Executor;
+use std::sync::Arc;
 
-pub struct CreateTableExecutor {}
+use super::Executor;
+use crate::{binder::BoundCreateTable, catalog::DatabaseCatalog};
+
+pub struct CreateTableExecutor {
+    stmt: BoundCreateTable,
+    catalog: Arc<DatabaseCatalog>,
+}
 
 impl CreateTableExecutor {
-    pub fn new() -> Self {
-        todo!()
+    pub fn new(stmt: BoundCreateTable, catalog: Arc<DatabaseCatalog>) -> Self {
+        CreateTableExecutor { stmt, catalog }
     }
 }
 
 impl Executor for CreateTableExecutor {
     fn execute(&self) -> Result<String, super::ExecutionError> {
-        todo!()
+        let schema = self.catalog.get_schema(self.stmt.schema_id).unwrap();
+        let table_id = schema
+            .add_table(&self.stmt.name, &(self.stmt.columns[..]))
+            .unwrap();
+
+        Ok(format!(
+            "Table {} created. Table id = {}",
+            self.stmt.name,
+            table_id
+        ))
     }
 }

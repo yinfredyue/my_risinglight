@@ -37,11 +37,12 @@ pub struct Database {
 
 impl Database {
     pub fn new() -> Self {
+        let catalog = Arc::new(DatabaseCatalog::new());
         Database {
             inner: Inner {
                 parser: Parser::new(),
-                binder: Binder::new(),
-                executor_builder: ExecutorBuilder::new(Arc::new(DatabaseCatalog::new())),
+                binder: Binder::new(Arc::clone(&catalog)),
+                executor_builder: ExecutorBuilder::new(Arc::clone(&catalog)),
             },
         }
     }

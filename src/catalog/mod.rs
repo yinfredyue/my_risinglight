@@ -3,11 +3,11 @@ mod database;
 mod schema;
 mod table;
 
-type SchemaId = u32;
+pub type SchemaId = u32;
 
-type TableId = u32;
+pub type TableId = u32;
 
-type ColumnId = u32;
+pub type ColumnId = u32;
 
 #[derive(Debug, thiserror::Error)]
 pub enum CatalogError {
@@ -17,4 +17,6 @@ pub enum CatalogError {
 
 
 pub use database::DatabaseCatalog;
+pub use column::ColumnDesc;
 
+pub const DEFAULT_SCHEMA_NAME: &'static str = "default_schema";

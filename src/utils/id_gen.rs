@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct IntIdGen {
     next_id: u32,
 }

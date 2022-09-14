@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 struct Inner {
     schemas: HashMap<SchemaId, Arc<SchemaCatalog>>,
     name_to_id: HashMap<String, SchemaId>,
-    id_gen: IntIdGen,
+    schema_id_gen: IntIdGen,
 }
 
 // The same Arc<Mutex<T>> pattern. Arc is not be part of the struct, but
@@ -19,19 +19,23 @@ pub struct DatabaseCatalog {
 
 impl DatabaseCatalog {
     pub fn new() -> Self {
-        DatabaseCatalog {
+        let catalog = DatabaseCatalog {
             inner: Mutex::new(Inner {
                 schemas: HashMap::new(),
                 name_to_id: HashMap::new(),
-                id_gen: IntIdGen::new(),
+                schema_id_gen: IntIdGen::new(),
             }),
-        }
+        };
+        catalog
+            .add_schema(super::DEFAULT_SCHEMA_NAME)
+            .expect("Cannot initialize default schema");
+        catalog
     }
 
     pub fn add_schema(&self, name: &str) -> Result<SchemaId, CatalogError> {
         let mut inner = self.inner.lock().unwrap();
 
-        let schema_id = inner.id_gen.next_id();
+        let schema_id = inner.schema_id_gen.next_id();
         if inner.name_to_id.contains_key(name) {
             return Err(CatalogError::DuplicateName);
         }
@@ -44,6 +48,15 @@ impl DatabaseCatalog {
 
     pub fn get_schema(&self, id: SchemaId) -> Option<Arc<SchemaCatalog>> {
         self.inner.lock().unwrap().schemas.get(&id).cloned()
+    }
+
+    pub fn get_schema_by_name(&self, name: &str) -> Option<Arc<SchemaCatalog>> {
+        let inner = self.inner.lock().unwrap();
+        inner
+            .name_to_id
+            .get(name)
+            .and_then(|id| inner.schemas.get(id))
+            .cloned()
     }
 
     pub fn del_schema(&self, id: SchemaId) {

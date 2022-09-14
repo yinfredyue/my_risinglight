@@ -1,6 +1,8 @@
 use crate::{binder::BoundStatement, catalog::DatabaseCatalog};
 use std::sync::Arc;
 
+use self::create::CreateTableExecutor;
+
 mod create;
 
 #[derive(Debug, thiserror::Error)]
@@ -16,7 +18,12 @@ impl ExecutorBuilder {
     }
 
     pub fn build(&self, bound_stmt: BoundStatement) -> Box<dyn Executor> {
-        todo!()
+        let executor = match bound_stmt {
+            BoundStatement::CreateTable(bound) => {
+                CreateTableExecutor::new(bound, Arc::clone(&self.catalog))
+            }
+        };
+        Box::new(executor)
     }
 }
 
