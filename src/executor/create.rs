@@ -17,14 +17,11 @@ impl CreateTableExecutor {
 impl Executor for CreateTableExecutor {
     fn execute(&self) -> Result<String, super::ExecutionError> {
         let schema = self.catalog.get_schema(self.stmt.schema_id).unwrap();
-        let table_id = schema
-            .add_table(&self.stmt.name, &(self.stmt.columns[..]))
-            .unwrap();
+        let table_id = schema.add_table(&self.stmt.name, &(self.stmt.columns[..]))?;
 
         Ok(format!(
             "Table {} created. Table id = {}",
-            self.stmt.name,
-            table_id
+            self.stmt.name, table_id
         ))
     }
 }

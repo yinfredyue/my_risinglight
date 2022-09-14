@@ -50,7 +50,7 @@ impl SchemaCatalog {
         }
 
         let id = inner.id_gen.next_id();
-        let table_catalog = TableCatalog::new(id, name.to_owned(), columns);
+        let table_catalog = TableCatalog::new(id, name.to_owned(), columns)?;
         inner.tables.insert(id, Arc::new(table_catalog));
         inner.name_to_id.insert(name.to_owned(), id);
 

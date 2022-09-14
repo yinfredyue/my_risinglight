@@ -13,10 +13,12 @@ pub type ColumnId = u32;
 pub enum CatalogError {
     #[error("duplicata name")]
     DuplicateName,
+    #[error("cannot create table with no column")]
+    CreateTableWithoutColumn,
 }
 
 
 pub use database::DatabaseCatalog;
 pub use column::ColumnDesc;
 
-pub const DEFAULT_SCHEMA_NAME: &'static str = "default_schema";
+pub const DEFAULT_SCHEMA_NAME: &'static str = "postgres";

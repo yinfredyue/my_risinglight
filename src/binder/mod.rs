@@ -17,6 +17,8 @@ pub enum BindingError {
     InvalidTableName(Vec<Ident>),
     #[error("schema not found: {0}")]
     SchemaNotFound(String),
+    #[error("cannot create table with zero column")]
+    EmptyColumns,
 }
 
 pub struct Binder {

@@ -3,7 +3,15 @@ use std::path::Path;
 use test_case::test_case;
 
 #[test_case("01-01.slt")]
-fn test(name: &str) {
+fn test_01_01(name: &str) {
+    init_logger();
+    let script = std::fs::read_to_string(Path::new("./sql").join(name)).unwrap();
+    let mut tester = sqllogictest::Runner::new(Wrapper(Database::new()));
+    tester.run_script(&script).unwrap();
+}
+
+#[test_case("01-03.slt")]
+fn test_01_03(name: &str) {
     init_logger();
     let script = std::fs::read_to_string(Path::new("./sql").join(name)).unwrap();
     let mut tester = sqllogictest::Runner::new(Wrapper(Database::new()));

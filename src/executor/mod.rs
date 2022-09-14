@@ -1,4 +1,4 @@
-use crate::{binder::BoundStatement, catalog::DatabaseCatalog};
+use crate::{binder::BoundStatement, catalog::{DatabaseCatalog, CatalogError}};
 use std::sync::Arc;
 
 use self::create::CreateTableExecutor;
@@ -6,7 +6,10 @@ use self::create::CreateTableExecutor;
 mod create;
 
 #[derive(Debug, thiserror::Error)]
-pub enum ExecutionError {}
+pub enum ExecutionError {
+    #[error("catalog error: {0}")]
+    CatalogError(#[from] CatalogError)
+}
 
 pub struct ExecutorBuilder {
     catalog: Arc<DatabaseCatalog>,
