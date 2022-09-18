@@ -1,3 +1,5 @@
+use std::iter::FromIterator;
+
 use super::{Array, ArrayBuilder};
 use bitvec::vec::BitVec;
 
@@ -22,6 +24,14 @@ impl Array for Utf8Array {
 
     fn len(&self) -> usize {
         return self.is_valid.len();
+    }
+}
+
+// Enable `collect()` an array from iterator of `Option<&str>` or `Option<String>`.
+// Use AsRef<str> such that we suppport both &str and String!
+impl<Str: AsRef<str>> FromIterator<Str> for Utf8Array {
+    fn from_iter<I: IntoIterator<Item = Str>>(iter: I) -> Self {
+        todo!()
     }
 }
 

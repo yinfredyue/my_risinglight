@@ -1,8 +1,10 @@
 mod primitive_array;
 mod utf8_array;
+mod iter;
 
 use primitive_array::{PrimitiveArray, PrimitiveArrayBuilder};
 use utf8_array::{Utf8Array, Utf8ArrayBuilder};
+use iter::ArrayIter;
 
 /// A trait over all array.
 ///
@@ -27,10 +29,10 @@ pub trait Array: Sized + Send + Sync + 'static {
     /// Number of items of array.
     fn len(&self) -> usize;
 
-    /// Get iterator of current array.
-    // fn iter(&self) -> ArrayIter<'_, Self> {
-    //     ArrayIter::new(self)
-    // }
+    // Get iterator of current array.
+    fn iter(&self) -> ArrayIter<'_, Self> {
+        ArrayIter::new(self)
+    }
 
     /// Check if the array has a length of 0.
     fn is_empty(&self) -> bool {

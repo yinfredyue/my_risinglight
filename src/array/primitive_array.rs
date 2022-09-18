@@ -1,6 +1,6 @@
 use super::{Array, ArrayBuilder};
 use bitvec::vec::BitVec;
-use std::fmt::Debug;
+use std::{fmt::Debug, iter::FromIterator};
 
 /// A collection of primitive types, such as `i32`, `f32`.
 pub trait Primitive:
@@ -38,6 +38,20 @@ impl<T: Primitive> Array for PrimitiveArray<T> {
 
     fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+}
+
+// Enable `collect` from iterator of `Option<T>`
+impl<T: Primitive> FromIterator<Option<T>> for PrimitiveArray<T> {
+    fn from_iter<I: IntoIterator<Item = Option<T>>>(iter: I) -> Self {
+        todo!()
+    }
+}
+
+// Enable `collect` from iterator of `T`
+impl<T: Primitive> FromIterator<T> for PrimitiveArray<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        todo!()
     }
 }
 
