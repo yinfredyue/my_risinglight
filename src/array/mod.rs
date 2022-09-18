@@ -1,10 +1,12 @@
+mod iter;
 mod primitive_array;
 mod utf8_array;
-mod iter;
 
-use primitive_array::{PrimitiveArray, PrimitiveArrayBuilder};
-use utf8_array::{Utf8Array, Utf8ArrayBuilder};
+use super::types::{Value, ValueType};
 use iter::ArrayIter;
+use primitive_array::{PrimitiveArray, PrimitiveArrayBuilder};
+use sqlparser::ast::DataType;
+use utf8_array::{Utf8Array, Utf8ArrayBuilder};
 
 /// A trait over all array.
 ///
@@ -71,11 +73,49 @@ pub type BoolArray = PrimitiveArray<bool>;
 pub type I32Array = PrimitiveArray<i32>;
 pub type F64Array = PrimitiveArray<f64>;
 
+// ArrayImpl is just a wrapper over different types of Array's  
+// It might be surprising that ArrayImpl does not implement Array trait.
 pub enum ArrayImpl {
     Bool(BoolArray),
     Int32(I32Array),
     Float64(F64Array),
     Utf8(Utf8Array),
+}
+
+impl ArrayImpl {
+    fn get(&self, idx: usize) -> Value {
+        match self {
+            ArrayImpl::Bool(a) => match a.get(idx) {
+                None => Value::Null,
+                Some(v) => Value::Bool(*v),
+            },
+            ArrayImpl::Int32(a) => match a.get(idx) {
+                None => Value::Null,
+                Some(v) => Value::Int32(*v),
+            },
+            ArrayImpl::Float64(a) => match a.get(idx) {
+                None => Value::Null,
+                Some(v) => Value::Float64(*v),
+            },
+            ArrayImpl::Utf8(a) => match a.get(idx) {
+                None => Value::Null,
+                Some(v) => Value::String(String::from(v)),
+            },
+        }
+    }
+
+    fn len(&self) -> usize {
+        match self {
+            ArrayImpl::Bool(a) => a.len(),
+            ArrayImpl::Int32(a) => a.len(),
+            ArrayImpl::Float64(a) => a.len(),
+            ArrayImpl::Utf8(a) => a.len(),
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 pub type BoolArrayBuilder = PrimitiveArrayBuilder<bool>;
@@ -85,6 +125,56 @@ pub type F64ArrayBuilder = PrimitiveArrayBuilder<f64>;
 pub enum ArrayBuilderImpl {
     Bool(BoolArrayBuilder),
     Int32(I32ArrayBuilder),
-    F64(F64ArrayBuilder),
+    Float64(F64ArrayBuilder),
     Utf8(Utf8ArrayBuilder),
+}
+
+// Surprisingly, ArrayBuilderImpl does not implement ArrayBuilder trait
+impl ArrayBuilderImpl {
+    pub fn with_capacity(capacity: usize, value_type: ValueType) -> Self {
+        match value_type.data_type() {
+            DataType::Boolean => Self::Bool(BoolArrayBuilder::with_capacity(capacity)),
+            DataType::Int(_) => Self::Int32(I32ArrayBuilder::with_capacity(capacity)),
+            DataType::Float(_) | DataType::Double => {
+                Self::Float64(F64ArrayBuilder::with_capacity(capacity))
+            }
+            DataType::Char(_) | DataType::Varchar(_) | DataType::String => {
+                Self::Utf8(Utf8ArrayBuilder::with_capacity(capacity))
+            }
+            _ => panic!("unsupported data type"),
+        }
+    }
+
+    pub fn push(&mut self, v: &Value) {
+        match (self, v) {
+            (Self::Bool(a), Value::Bool(v)) => a.push(Some(v)),
+            (Self::Int32(a), Value::Int32(v)) => a.push(Some(v)),
+            (Self::Float64(a), Value::Float64(v)) => a.push(Some(v)),
+            (Self::Utf8(a), Value::String(v)) => a.push(Some(v)),
+            (Self::Bool(a), Value::Null) => a.push(None),
+            (Self::Int32(a), Value::Null) => a.push(None),
+            (Self::Float64(a), Value::Null) => a.push(None),
+            (Self::Utf8(a), Value::Null) => a.push(None),
+            _ => panic!("failed to push value: type mismatch"),
+        }
+    }
+
+    pub fn append(&mut self, array_impl: &ArrayImpl) {
+        match (self, array_impl) {
+            (Self::Bool(builder), ArrayImpl::Bool(arr)) => builder.append(arr),
+            (Self::Int32(builder), ArrayImpl::Int32(arr)) => builder.append(arr),
+            (Self::Float64(builder), ArrayImpl::Float64(arr)) => builder.append(arr),
+            (Self::Utf8(builder), ArrayImpl::Utf8(arr)) => builder.append(arr),
+            _ => panic!("failed to append value: type mismatch"),
+        }
+    }
+
+    pub fn finish(self) -> ArrayImpl {
+        match self {
+            ArrayBuilderImpl::Bool(b) => ArrayImpl::Bool(b.finish()),
+            ArrayBuilderImpl::Int32(b) => ArrayImpl::Int32(b.finish()),
+            ArrayBuilderImpl::Float64(b) => ArrayImpl::Float64(b.finish()),
+            ArrayBuilderImpl::Utf8(b) => ArrayImpl::Utf8(b.finish()),
+        }
+    }
 }
