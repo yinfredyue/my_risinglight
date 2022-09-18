@@ -29,9 +29,17 @@ impl Array for Utf8Array {
 
 // Enable `collect()` an array from iterator of `Option<&str>` or `Option<String>`.
 // Use AsRef<str> such that we suppport both &str and String!
-impl<Str: AsRef<str>> FromIterator<Str> for Utf8Array {
-    fn from_iter<I: IntoIterator<Item = Str>>(iter: I) -> Self {
-        todo!()
+impl<Str: AsRef<str>> FromIterator<Option<Str>> for Utf8Array {
+    fn from_iter<I: IntoIterator<Item = Option<Str>>>(iter: I) -> Self {
+        let mut builder = Utf8ArrayBuilder::with_capacity(0);
+        for s in iter.into_iter() {
+            if let Some(s) = s {
+                builder.push(Some(s.as_ref()))
+            } else {
+                builder.push(None)
+            }
+        }
+        builder.finish()
     }
 }
 
@@ -102,5 +110,12 @@ mod tests {
         assert_eq!(arr.get(1), Some("1"));
         assert_eq!(arr.get(2), None);
         assert_eq!(arr.get(3), Some("3"));
+    }
+
+    #[test]
+    fn test_collect() {
+        let iter = [None, Some("1"), None, Some("3")].into_iter();
+        let array = iter.clone().collect::<Utf8Array>();
+        assert_eq!(array.iter().collect::<Vec<_>>(), iter.collect::<Vec<_>>());
     }
 }

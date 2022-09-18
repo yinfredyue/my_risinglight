@@ -2,11 +2,12 @@ use super::Array;
 
 pub struct ArrayIter<'a, A: Array> {
     array: &'a A,
+    idx: usize,
 }
 
 impl<'a, A: Array> ArrayIter<'a, A> {
-    pub fn new(arr: &A) -> Self {
-        todo!()
+    pub fn new(array: &'a A) -> Self {
+        Self { array, idx: 0 }
     }
 }
 
@@ -19,6 +20,12 @@ impl<'a, A: Array> Iterator for ArrayIter<'a, A> {
     type Item = Option<&'a A::Item>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        if self.idx >= self.array.len() {
+            None
+        } else {
+            let v = self.array.get(self.idx);
+            self.idx += 1;
+            Some(v)
+        }
     }
 }

@@ -44,14 +44,24 @@ impl<T: Primitive> Array for PrimitiveArray<T> {
 // Enable `collect` from iterator of `Option<T>`
 impl<T: Primitive> FromIterator<Option<T>> for PrimitiveArray<T> {
     fn from_iter<I: IntoIterator<Item = Option<T>>>(iter: I) -> Self {
-        todo!()
+        let vec: Vec<Option<T>> = iter.into_iter().collect();
+        let mut builder = PrimitiveArrayBuilder::with_capacity(vec.len());
+        for v in vec {
+            builder.push(v.as_ref());
+        }
+        builder.finish()
     }
 }
 
 // Enable `collect` from iterator of `T`
 impl<T: Primitive> FromIterator<T> for PrimitiveArray<T> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        todo!()
+        let iter = iter.into_iter().map(|v| Some(v));
+        let mut builder = PrimitiveArrayBuilder::with_capacity(iter.size_hint().0);
+        for v in iter {
+            builder.push(v.as_ref());
+        }
+        builder.finish()
     }
 }
 
@@ -132,5 +142,15 @@ mod tests {
         for i in 0..1000 {
             assert_eq!(num_to_val(i), arr2.get(i as usize).cloned());
         }
+    }
+
+    #[test]
+    fn test_collect() {
+        let iter = (0..1000).map(|x| if x % 2 == 0 { None } else { Some(x) });
+        let array = iter.clone().collect::<PrimitiveArray<i32>>();
+        assert_eq!(
+            array.iter().map(|x| x.cloned()).collect::<Vec<_>>(),
+            iter.collect::<Vec<_>>()
+        );
     }
 }
