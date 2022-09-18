@@ -1,3 +1,4 @@
+mod data_chunk;
 mod iter;
 mod primitive_array;
 mod utf8_array;
@@ -73,7 +74,7 @@ pub type BoolArray = PrimitiveArray<bool>;
 pub type I32Array = PrimitiveArray<i32>;
 pub type F64Array = PrimitiveArray<f64>;
 
-// ArrayImpl is just a wrapper over different types of Array's  
+// ArrayImpl is just a wrapper over different types of Array's
 // It might be surprising that ArrayImpl does not implement Array trait.
 pub enum ArrayImpl {
     Bool(BoolArray),
