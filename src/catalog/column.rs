@@ -3,7 +3,6 @@ use sqlparser::{ast::ColumnDef, ast::ColumnOption};
 
 #[derive(Debug, Clone)]
 pub struct ColumnDesc {
-    name: String,
     is_primary: bool,
     value_type: ValueType,
 }
@@ -17,9 +16,6 @@ impl ColumnDesc {
     }
     pub fn value_type(&self) -> ValueType {
         self.value_type.clone()
-    }
-    pub fn name(&self) -> String {
-        self.name.clone()
     }
 }
 
@@ -41,7 +37,6 @@ impl From<ColumnDef> for ColumnDesc {
         }
 
         ColumnDesc {
-            name: def.name.value,
             is_primary: primary,
             value_type: ValueType::new(def.data_type, is_nullable),
         }

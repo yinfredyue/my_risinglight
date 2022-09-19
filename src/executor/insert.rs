@@ -1,18 +1,20 @@
-use crate::binder::BoundInsert;
+use crate::{binder::BoundInsert, array::DataChunk};
 
 use super::Executor;
 
-pub struct InsertExecutor {}
+pub struct InsertExecutor {
+    stmt: BoundInsert,
+}
 
 impl InsertExecutor {
     pub fn new(bound_stmt: BoundInsert) -> Self {
-        todo!()
+        Self { stmt: bound_stmt }
     }
 }
 
 impl Executor for InsertExecutor {
-    fn execute(&self) -> Result<String, super::ExecutionError> {
-        todo!()
+    fn execute(&self) -> Result<DataChunk, super::ExecutionError> {
+        Ok(DataChunk::new(vec![]))
     }
 }
 

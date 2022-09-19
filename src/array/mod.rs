@@ -4,12 +4,12 @@ mod primitive_array;
 mod utf8_array;
 
 pub use data_chunk::DataChunk;
+pub use utf8_array::{Utf8Array, Utf8ArrayBuilder};
 
 use super::types::{Value, ValueType};
 use iter::ArrayIter;
 use primitive_array::{PrimitiveArray, PrimitiveArrayBuilder};
 use sqlparser::ast::DataType;
-use utf8_array::{Utf8Array, Utf8ArrayBuilder};
 
 /// A trait over all array.
 ///
@@ -121,6 +121,18 @@ impl ArrayImpl {
     }
 }
 
+impl From<&Value> for ArrayImpl {
+    fn from(val: &Value) -> Self {
+        match val {
+            Value::Null => panic!("from null to ArrayImpl?"),
+            Value::Bool(b) => Self::Bool([*b].into_iter().collect()),
+            Value::Int32(i) => Self::Int32([*i].into_iter().collect()),
+            Value::Float64(f) => Self::Float64([*f].into_iter().collect()),
+            Value::String(s) => Self::Utf8([Some(s)].into_iter().collect()),
+        }
+    }
+}
+
 pub type BoolArrayBuilder = PrimitiveArrayBuilder<bool>;
 pub type I32ArrayBuilder = PrimitiveArrayBuilder<i32>;
 pub type F64ArrayBuilder = PrimitiveArrayBuilder<f64>;
@@ -181,3 +193,5 @@ impl ArrayBuilderImpl {
         }
     }
 }
+
+

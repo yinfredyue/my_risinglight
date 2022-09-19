@@ -17,8 +17,8 @@ fn main() -> Result<(), DbError> {
                     "" => (),
                     "quit" | "exit" => break,
                     sql => {
-                        let mut res = db.run(sql)?;
-                        println!("{}", res.remove(0));
+                        let res = db.run(sql)?;
+                        println!("{}", res);
                     }
                 };
             }

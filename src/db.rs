@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use crate::array::DataChunk;
 use crate::binder::Binder;
 use crate::catalog::DatabaseCatalog;
 use crate::executor::ExecutorBuilder;
@@ -47,12 +48,12 @@ impl Database {
         }
     }
 
-    pub fn run(&self, sql: &str) -> Result<Vec<String>, DbError> {
+    pub fn run(&self, sql: &str) -> Result<DataChunk, DbError> {
         let stmt = self.inner.parser.parse_sql(sql)?.remove(0);
         let bound_stmt = self.inner.binder.bind(&stmt)?;
         let executor = self.inner.executor_builder.build(bound_stmt);
-        let results = executor.execute()?;
+        let result = executor.execute()?;
 
-        Ok(vec![results])
+        Ok(result)
     }
 }

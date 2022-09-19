@@ -45,3 +45,15 @@ impl Value {
         }
     }
 }
+
+impl ToString for Value {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Null => String::from("NULL"),
+            Self::Bool(v) => v.to_string(),
+            Self::Int32(v) => v.to_string(),
+            Self::Float64(v) => v.to_string(),
+            Self::String(v) => v.to_string(),
+        }
+    }
+}

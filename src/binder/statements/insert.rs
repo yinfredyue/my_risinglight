@@ -36,7 +36,7 @@ impl Binder {
                     .ok_or_else(|| BindingError::TableNotFound(String::from(table_name)))?;
 
                 // check columns
-                let column_descs: Vec<_> = if columns.is_empty() {
+                let columns: Vec<_> = if columns.is_empty() {
                     table.all_columns()
                 } else {
                     columns
@@ -48,10 +48,7 @@ impl Binder {
                                 .ok_or_else(|| BindingError::TableNotFound(String::from(col_name)))
                         })
                         .collect::<Result<Vec<Arc<ColumnCatalog>>, BindingError>>()?
-                }
-                .iter()
-                .map(|col| col.desc())
-                .collect();
+                };
 
                 let raw_values = match source.body.as_ref() {
                     SetExpr::Values(values) => &values.0,
@@ -60,23 +57,23 @@ impl Binder {
 
                 let mut bound_rows = Vec::new();
                 for row in raw_values {
-                    if row.len() != column_descs.len() {
+                    if row.len() != columns.len() {
                         return Err(BindingError::TupleLengthMismatch);
                     }
 
                     let mut exprs = Vec::new();
                     for (idx, expr) in row.iter().enumerate() {
                         let bound_expr = self.bind_expr(expr);
-                        let col = &column_descs[idx];
+                        let col = &columns[idx];
 
                         // check null
-                        if bound_expr.is_null() && !col.is_nullable() {
+                        if bound_expr.is_null() && !col.desc().is_nullable() {
                             return Err(BindingError::NonNullableColumn(col.name()));
                         }
 
                         // check type
                         let expr_type = bound_expr.data_type().unwrap();
-                        let col_type = col.value_type().data_type();
+                        let col_type = col.desc().value_type().data_type();
                         // TODO: support automatic type cast
                         if expr_type != col_type {
                             return Err(BindingError::TypeMismatch(col_type, expr_type));

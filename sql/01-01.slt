@@ -7,13 +7,18 @@
 query I 
 SELECT 1
 ----
-1
++---+
+| 1 |
++---+
+
 
 # T: expect text
 query T 
 SELECT 'Hello, world!'
 ----
-Hello, world!
++---------------+
+| Hello, world! |
++---------------+
 
 # expression is not a valid SQL statement
 statement error

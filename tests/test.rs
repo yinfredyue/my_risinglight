@@ -23,8 +23,8 @@ struct Wrapper(Database);
 impl sqllogictest::DB for Wrapper {
     type Error = DbError;
     fn run(&self, sql: &str) -> Result<String, Self::Error> {
-        let mut outputs = self.0.run(sql)?;
-        Ok(outputs.remove(0))
+        let output = self.0.run(sql)?;
+        Ok(output.to_string())
     }
 }
 

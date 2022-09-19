@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::Executor;
-use crate::{binder::BoundCreateTable, catalog::DatabaseCatalog};
+use crate::{array::DataChunk, binder::BoundCreateTable, catalog::DatabaseCatalog};
 
 pub struct CreateTableExecutor {
     stmt: BoundCreateTable,
@@ -15,13 +15,9 @@ impl CreateTableExecutor {
 }
 
 impl Executor for CreateTableExecutor {
-    fn execute(&self) -> Result<String, super::ExecutionError> {
+    fn execute(&self) -> Result<DataChunk, super::ExecutionError> {
         let schema = self.catalog.get_schema(self.stmt.schema_id).unwrap();
-        let table_id = schema.add_table(&self.stmt.name, &(self.stmt.columns[..]))?;
-
-        Ok(format!(
-            "Table {} created. Table id = {}",
-            self.stmt.name, table_id
-        ))
+        schema.add_table(&self.stmt.name, &(self.stmt.columns[..]))?;
+        Ok(DataChunk::new(vec![]))
     }
 }

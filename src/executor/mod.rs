@@ -1,6 +1,6 @@
 use crate::{
     binder::BoundStatement,
-    catalog::{CatalogError, DatabaseCatalog},
+    catalog::{CatalogError, DatabaseCatalog}, array::DataChunk,
 };
 use std::sync::Arc;
 
@@ -37,5 +37,5 @@ impl ExecutorBuilder {
 }
 
 pub trait Executor {
-    fn execute(&self) -> Result<String, ExecutionError>;
+    fn execute(&self) -> Result<DataChunk, ExecutionError>;
 }
