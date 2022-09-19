@@ -1,4 +1,4 @@
-use super::{ArrayBuilderImpl, ArrayImpl};
+use super::ArrayImpl;
 use std::{iter::FromIterator, sync::Arc};
 
 // A datachunk is a collection of arrays.

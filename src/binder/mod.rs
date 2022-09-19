@@ -1,10 +1,11 @@
 mod statements;
 mod expression;
 
-use std::sync::Arc;
-
-use super::catalog::DEFAULT_SCHEMA_NAME;
 pub use crate::binder::statements::{BoundCreateTable, BoundInsert, BoundSelect};
+pub use expression::BoundExpr;
+
+use std::sync::Arc;
+use super::catalog::DEFAULT_SCHEMA_NAME;
 use crate::{catalog::DatabaseCatalog, parser::Statement};
 use sqlparser::ast::{Ident, ObjectName, DataType};
 
