@@ -4,6 +4,7 @@ use std::{iter::FromIterator, sync::Arc};
 // A datachunk is a collection of arrays.
 //
 // It's a horizontal subset of a table/query result.
+#[derive(Clone)]
 pub struct DataChunk {
     arrays: Arc<[ArrayImpl]>,
 }

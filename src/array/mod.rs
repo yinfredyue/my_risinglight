@@ -3,6 +3,8 @@ mod iter;
 mod primitive_array;
 mod utf8_array;
 
+pub use data_chunk::DataChunk;
+
 use super::types::{Value, ValueType};
 use iter::ArrayIter;
 use primitive_array::{PrimitiveArray, PrimitiveArrayBuilder};
