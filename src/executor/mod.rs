@@ -4,9 +4,10 @@ use crate::{
 };
 use std::sync::Arc;
 
-use self::{create::CreateTableExecutor, select::SelectExecutor};
+use self::{create::CreateTableExecutor, insert::InsertExecutor, select::SelectExecutor};
 
 mod create;
+mod insert;
 mod select;
 
 #[derive(Debug, thiserror::Error)]
@@ -26,10 +27,11 @@ impl ExecutorBuilder {
 
     pub fn build(&self, bound_stmt: BoundStatement) -> Box<dyn Executor> {
         match bound_stmt {
+            BoundStatement::Select(bound) => Box::new(SelectExecutor::new(bound)),
+            BoundStatement::Insert(bound) => Box::new(InsertExecutor::new(bound)),
             BoundStatement::CreateTable(bound) => {
                 Box::new(CreateTableExecutor::new(bound, Arc::clone(&self.catalog)))
             }
-            BoundStatement::Select(bound) => Box::new(SelectExecutor::new(bound)),
         }
     }
 }

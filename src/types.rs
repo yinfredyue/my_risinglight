@@ -2,6 +2,7 @@
 // 为了方便，我们可以直接使用 sqlparser 中定义的类型
 pub use sqlparser::ast::DataType;
 
+#[derive(Debug, Clone)]
 pub struct ValueType {
     data_type: DataType,
     nullable: bool,
@@ -9,7 +10,10 @@ pub struct ValueType {
 
 impl ValueType {
     pub const fn new(data_type: DataType, nullable: bool) -> Self {
-        ValueType { data_type, nullable }
+        ValueType {
+            data_type,
+            nullable,
+        }
     }
 
     pub fn is_nullable(&self) -> bool {
@@ -28,4 +32,16 @@ pub enum Value {
     Int32(i32),
     Float64(f64),
     String(String),
+}
+
+impl Value {
+    pub fn data_type(&self) -> Option<DataType> {
+        match self {
+            Value::Null => None,
+            Value::Bool(_) => Some(DataType::Boolean),
+            Value::Int32(_) => Some(DataType::Integer(None)),
+            Value::Float64(_) => Some(DataType::Float(None)),
+            Value::String(_) => Some(DataType::String),
+        }
+    }
 }

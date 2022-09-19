@@ -1,80 +1,71 @@
+use crate::{catalog::ColumnId, types::ValueType};
 use sqlparser::{ast::ColumnDef, ast::ColumnOption};
-
-use crate::catalog::ColumnId;
-use crate::types::DataType;
-use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone)]
 pub struct ColumnDesc {
-    is_nullable: bool,
+    name: String,
     is_primary: bool,
-    data_type: DataType,
+    value_type: ValueType,
 }
 
 impl ColumnDesc {
     pub fn is_nullable(&self) -> bool {
-        self.is_nullable
+        self.value_type.is_nullable()
     }
     pub fn is_primary(&self) -> bool {
         self.is_primary
     }
-    pub fn datatype(&self) -> DataType {
-        self.data_type.clone()
+    pub fn value_type(&self) -> ValueType {
+        self.value_type.clone()
+    }
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }
 
 impl From<ColumnDef> for ColumnDesc {
     fn from(def: ColumnDef) -> Self {
-        let mut desc = ColumnDesc {
-            is_nullable: true,
-            is_primary: false,
-            data_type: def.data_type,
-        };
-
+        let mut primary = false;
+        let mut is_nullable = true;
         for option_def in def.options {
             match option_def.option {
-                ColumnOption::NotNull => desc.is_nullable = false,
+                ColumnOption::NotNull => {
+                    is_nullable = false;
+                }
                 ColumnOption::Unique { is_primary } => {
-                    desc.is_primary = is_primary;
-                    desc.is_nullable = false;
+                    primary = is_primary;
+                    is_nullable = false;
                 }
                 _ => (),
             };
         }
 
-        desc
+        ColumnDesc {
+            name: def.name.value,
+            is_primary: primary,
+            value_type: ValueType::new(def.data_type, is_nullable),
+        }
     }
-}
-
-#[derive(Debug)]
-struct ColumnCatalogInner {
-    id: ColumnId,
-    name: String,
-    desc: Arc<ColumnDesc>,
 }
 
 #[derive(Debug)]
 pub struct ColumnCatalog {
-    inner: Mutex<ColumnCatalogInner>,
+    id: ColumnId,
+    name: String,
+    desc: ColumnDesc,
 }
 
 impl ColumnCatalog {
     pub fn new(id: ColumnId, name: String, desc: ColumnDesc) -> Self {
-        ColumnCatalog {
-            inner: Mutex::new(ColumnCatalogInner {
-                id,
-                name,
-                desc: Arc::new(desc),
-            }),
-        }
+        ColumnCatalog { id, name, desc }
     }
     pub fn id(&self) -> ColumnId {
-        self.inner.lock().unwrap().id
+        self.id
     }
     pub fn name(&self) -> String {
-        self.inner.lock().unwrap().name.clone()
+        self.name.clone()
     }
-    pub fn desc(&self) -> Arc<ColumnDesc> {
-        self.inner.lock().unwrap().desc.clone()
+    pub fn desc(&self) -> ColumnDesc {
+        self.desc.clone()
     }
 }

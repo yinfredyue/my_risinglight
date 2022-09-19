@@ -18,7 +18,7 @@ struct Inner {
 }
 
 pub struct InMemoryStorage {
-    inner: Arc<Mutex<Inner>>,
+    inner: Mutex<Inner>,
 }
 
 impl InMemoryStorage {
@@ -27,7 +27,7 @@ impl InMemoryStorage {
             tables: HashMap::new(),
         };
         Self {
-            inner: Arc::new(Mutex::new(inner)),
+            inner: Mutex::new(inner),
         }
     }
 

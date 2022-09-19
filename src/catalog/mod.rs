@@ -33,7 +33,7 @@ pub enum CatalogError {
     CreateTableWithoutColumn,
 }
 
-pub use column::ColumnDesc;
+pub use column::{ColumnCatalog, ColumnDesc};
 pub use database::DatabaseCatalog;
 
 pub const DEFAULT_SCHEMA_NAME: &'static str = "postgres";

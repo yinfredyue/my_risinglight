@@ -61,6 +61,15 @@ impl SchemaCatalog {
         self.inner.lock().unwrap().tables.get(&id).cloned()
     }
 
+    pub fn get_table_by_name(&self, name: &str) -> Option<Arc<TableCatalog>> {
+        let inner = self.inner.lock().unwrap();
+        inner
+            .name_to_id
+            .get(name)
+            .and_then(|id| inner.tables.get(id))
+            .cloned()
+    }
+
     pub fn del_table(&self, id: TableId) {
         let mut inner = self.inner.lock().unwrap();
         let catalog = inner.tables.remove(&id);

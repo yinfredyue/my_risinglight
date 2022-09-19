@@ -11,6 +11,7 @@ struct Inner {
     id: TableId,
     name: String,
     columns: HashMap<ColumnId, Arc<ColumnCatalog>>,
+    name_to_id: HashMap<String, ColumnId>,
     column_id_gen: IntIdGen,
 }
 
@@ -29,6 +30,7 @@ impl TableCatalog {
                 id,
                 name,
                 columns: HashMap::new(),
+                name_to_id: HashMap::new(),
                 column_id_gen: IntIdGen::new(),
             }),
         };
@@ -49,6 +51,7 @@ impl TableCatalog {
                         column_desc.clone(),
                     )),
                 );
+                inner.name_to_id.insert(name.to_string(), column_id);
             }
         }
 
@@ -65,6 +68,15 @@ impl TableCatalog {
 
     pub fn get_column(&self, id: ColumnId) -> Option<Arc<ColumnCatalog>> {
         self.inner.lock().unwrap().columns.get(&id).cloned()
+    }
+
+    pub fn get_column_by_name(&self, name: &str) -> Option<Arc<ColumnCatalog>> {
+        let inner = self.inner.lock().unwrap();
+        inner
+            .name_to_id
+            .get(name)
+            .and_then(|id| inner.columns.get(id))
+            .cloned()
     }
 
     pub fn all_columns(&self) -> Vec<Arc<ColumnCatalog>> {
